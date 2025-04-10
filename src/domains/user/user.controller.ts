@@ -11,6 +11,16 @@ export class UserController {
   constructor(private userSevice: UserService){}
 
 
+  @Post('login')
+  login(@Res() res: Response){
+    const data = this.userSevice.login();
+    res.cookie('accessToken', data, {
+      httpOnly:true
+    })
+    res.status(200).send(data);
+
+  }
+
   @Get()
   findAll(){
     return this.userSevice.findAll();
