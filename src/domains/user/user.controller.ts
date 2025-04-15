@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UsePipes, ParseIntPipe, Query, ParseArrayPipe, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UsePipes, ParseIntPipe, Query, ParseArrayPipe, Res, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Response } from 'express';
+import { Request } from 'express';
 
 
 @Controller('user')
@@ -10,15 +10,22 @@ export class UserController {
 
   constructor(private userSevice: UserService){}
 
+//accessToken
+//refreshToken -> optional
 
   @Post('login')
-  login(@Res() res: Response){
+  login(){
     const data = this.userSevice.login();
-    res.cookie('accessToken', data, {
-      httpOnly:true
-    })
-    res.status(200).send(data);
+    // res.cookie('accessToken', data, {
+    //   httpOnly:true
+    // })
+    // res.status(200).send(data);
+    return data;
+  }
 
+  @Get('refreshToken')
+  refreshToken(@Req() req: Request){
+    return this.userSevice.refreshToken(req);
   }
 
   @Get()
