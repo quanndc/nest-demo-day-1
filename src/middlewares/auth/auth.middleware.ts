@@ -6,6 +6,7 @@ import * as JWT from '../../utils/token/extractToken.util';
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
   constructor(private jwtService: JwtService) {}
+  
   use(req: Request, res: Response, next: () => void) {
     // get token from cookie
     // const token = req.cookies['accessToken'] || "";

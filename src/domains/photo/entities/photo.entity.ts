@@ -11,8 +11,6 @@ export class Photo {
     @Column()
     url: string;
 
-    @ManyToOne(() => User, (user) => user.photos, { cascade: true })
-    user: User;
 
     @ManyToMany(() => Category, (category) => category.photos, { cascade: true })
     @JoinTable()

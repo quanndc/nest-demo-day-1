@@ -1,24 +1,24 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
-import { PostgresDataSource } from 'src/datasources/postgres.datasource';
 import { JwtService } from '@nestjs/jwt';
 import configuration from 'src/config/configuration';
 import { Request } from 'express';
 import * as JWT from '../../utils/token/extractToken.util';
+import { Cron } from '@nestjs/schedule';
 @Injectable()
 export class UserService {
 
   constructor(
-    @InjectRepository(User)
-    private usersRepository : Repository<User>,
+    @InjectRepository(User) private usersRepository : Repository<User>,
+    @InjectDataSource('default') private PostgresDataSource: DataSource,
     private jwtService: JwtService
   ) {}
 
   login(){
-    const payload = {name: 'quan', role: 'student', imgURL: ""}
+    const payload = {name: 'quan', role: ['user'], imgURL: ""}
 
     const token = configuration().jwt.secretAccessToken
     console.log(typeof token);
@@ -67,10 +67,8 @@ export class UserService {
 
   // FIND ALL
   async findAll() {
-    
     // return "findAll";
-
-    const queryRunner = PostgresDataSource.createQueryRunner();
+    const queryRunner = this.PostgresDataSource.createQueryRunner();
     await queryRunner.connect();
     // await queryRunner.startTransaction();
 
@@ -111,10 +109,22 @@ export class UserService {
     //   }
     // });
   }
+  // @Cron('* * * * * *')
+  // handleCron() {
+  //   console.log('Called when the current second is 45');
+  // }
 
   // FIND BY ID
   findOne(id: number){
-    return this.usersRepository.findOneBy({ id})
+    return "findOne";
+  }
+
+  // FIND ONE BY EMAIL
+  async findOneByEmail(email: string) {
+    const user = await this.usersRepository.findOne({
+      where: { email },
+    })
+    return user;
   }
 
   // CREATE
@@ -128,7 +138,7 @@ export class UserService {
     if (!existingUser) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    return this.usersRepository.save({ ...existingUser, ...user });
+    // return this.usersRepository.save({ ...existingUser, ...user });
   }
 
   // DELETE

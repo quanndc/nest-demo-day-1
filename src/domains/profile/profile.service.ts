@@ -18,11 +18,7 @@ export class ProfileService {
   }
 
   async findAll() {
-    return await this.profileRepository.find({
-      relations: {
-        user: true,
-      }
-    });
+    return await this.profileRepository.find({});
   }
 
   findOne(id: number) {

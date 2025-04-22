@@ -1,3 +1,4 @@
+import { Auth } from 'src/domains/auth/entities/auth.entity';
 import { Photo } from 'src/domains/photo/entities/photo.entity';
 import { Profile } from 'src/domains/profile/entities/profile.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
@@ -18,6 +19,12 @@ export class User {
         type: 'text',
         nullable: true,
     })
+    email: string
+
+    @Column({
+        type: 'text',
+        nullable: true,
+    })
     firstName: string;
   
     @Column({
@@ -26,10 +33,7 @@ export class User {
     })
     lastName: string;
 
-    @OneToOne(() => Profile, (profile) => profile.user)
+    @OneToOne(() => Auth, (auth) => auth.user, {cascade: true})
     @JoinColumn()
-    profile: Profile;
-
-    @OneToMany(() => Photo, (photo) => photo.user)
-    photos: Photo[];
+    auth: Auth
 }

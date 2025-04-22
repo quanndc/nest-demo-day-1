@@ -13,6 +13,6 @@ export class Profile {
     @Column()
     email: string;
 
-    @OneToOne(() => User, (user) => user.profile)
-    user: User;
+    // @OneToOne(() => User, (user) => user.profile)
+    // user: User;
 }

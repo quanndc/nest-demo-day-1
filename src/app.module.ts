@@ -7,43 +7,71 @@ import { ProfileModule } from './domains/profile/profile.module';
 import { PhotoModule } from './domains/photo/photo.module';
 import { CategoryModule } from './domains/category/category.module';
 import { AuthMiddleware } from './middlewares/auth/auth.middleware';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
+import { AuthModule } from './domains/auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [configuration]
+      load: [configuration],
+      isGlobal: true,
+      envFilePath: ['.env'],
+    }),
+    
+    TypeOrmModule.forRootAsync({
+      // ConfigServive
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          type: 'postgres',
+          host: 'localhost',
+          port: configService.get<number>('DATABASE_PORT'),
+          username: configService.get<string>('DATABASE_USERNAME'),
+          password: configService.get<string>('DATABASE_PASSWORD'),
+          database: configService.get<string>('DATABASE_NAME'),
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          autoLoadEntities: true,
+          synchronize: true,
+        };
+      }
+    }),
+    ThrottlerModule.forRoot({
+
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 3
+        }
+      ]
     }),
     JwtModule,
+    ScheduleModule.forRoot(),
     UserModule,
-    ProfileModule,
-    PhotoModule,
-    CategoryModule,
-    TypeOrmModule.forRoot({
-    type: configuration().database.type as any,
-    host: configuration().database.host,
-    port: 5432,
-    username: configuration().database.username,
-    password: configuration().database.password,
-    database: configuration().database.database,
-    entities: [],
-    synchronize: true,
-    autoLoadEntities: true,
-    logging: true,
-    ssl: false,
-
-  })],
+    // ProfileModule,
+    // PhotoModule,
+    // CategoryModule,
+    AuthModule,
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    JwtService,
+    // {
+    //   provide: 'APP_GUARD',
+    //   useClass: ThrottlerGuard,
+    // }
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthMiddleware).exclude(
-      {path: 'user/login', method: RequestMethod.ALL},
-      {path: 'user/signup', method: RequestMethod.ALL},
-      {path: 'user/refreshToken', method: RequestMethod.ALL},
+      { path: 'auth/login', method: RequestMethod.ALL },
+      { path: 'auth/signup', method: RequestMethod.ALL },
+      { path: 'auth/refresh-token', method: RequestMethod.ALL },
     ).forRoutes('*')
   }
 }
