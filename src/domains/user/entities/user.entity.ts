@@ -1,6 +1,5 @@
 import { Auth } from 'src/domains/auth/entities/auth.entity';
-import { Photo } from 'src/domains/photo/entities/photo.entity';
-import { Profile } from 'src/domains/profile/entities/profile.entity';
+import { Role } from 'src/enums/role.enum';
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 
 @Entity()
@@ -14,6 +13,13 @@ export class User {
         default: () => 'CURRENT_TIMESTAMP',
     })
     dob: Date;
+
+    @Column({
+        type: 'text',
+        array: true,
+        default: [Role.USER],
+    })
+    roles: string[];
 
     @Column({
         type: 'text',
@@ -33,6 +39,7 @@ export class User {
     })
     lastName: string;
 
+    // @Exclude()
     @OneToOne(() => Auth, (auth) => auth.user, {cascade: true})
     @JoinColumn()
     auth: Auth

@@ -3,16 +3,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './domains/user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProfileModule } from './domains/profile/profile.module';
-import { PhotoModule } from './domains/photo/photo.module';
-import { CategoryModule } from './domains/category/category.module';
 import { AuthMiddleware } from './middlewares/auth/auth.middleware';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './domains/auth/auth.module';
+import { ProductModule } from './domains/product/product.module';
+import { CategoryModule } from './domains/category/category.module';
+import { CaslModule } from './modules/casl/casl.module';
 
 @Module({
   imports: [
@@ -21,7 +19,7 @@ import { AuthModule } from './domains/auth/auth.module';
       isGlobal: true,
       envFilePath: ['.env'],
     }),
-    
+
     TypeOrmModule.forRootAsync({
       // ConfigServive
       inject: [ConfigService],
@@ -39,31 +37,17 @@ import { AuthModule } from './domains/auth/auth.module';
         };
       }
     }),
-    ThrottlerModule.forRoot({
-
-      throttlers: [
-        {
-          ttl: 60000,
-          limit: 3
-        }
-      ]
-    }),
     JwtModule,
-    ScheduleModule.forRoot(),
     UserModule,
-    // ProfileModule,
-    // PhotoModule,
-    // CategoryModule,
+    ProductModule,
+    CategoryModule,
     AuthModule,
+    CaslModule
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    JwtService,
-    // {
-    //   provide: 'APP_GUARD',
-    //   useClass: ThrottlerGuard,
-    // }
+    JwtService
   ],
 })
 export class AppModule implements NestModule {

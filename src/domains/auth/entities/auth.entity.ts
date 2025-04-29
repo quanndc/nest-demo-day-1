@@ -6,7 +6,7 @@ import {Entity, PrimaryGeneratedColumn, Column, OneToOne} from 'typeorm';
 export class Auth {
     @PrimaryGeneratedColumn()
     id: number;
-    
+    // regex
     @IsEmail()
     @IsNotEmpty()
     @Column({ unique: true })

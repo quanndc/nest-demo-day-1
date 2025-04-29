@@ -22,10 +22,13 @@ export class AuthMiddleware implements NestMiddleware {
       const decodedToken = this.jwtService.verify(token, {
         secret: configuration().jwt.secretAccessToken,
       })
+      
+      if(decodedToken){
+        req['user'] = decodedToken;
+        next();
+      }
     }catch(e){
       throw new HttpException('Token is invalid', HttpStatus.UNAUTHORIZED);
-    }finally{
-      next();
     }
   }
 }

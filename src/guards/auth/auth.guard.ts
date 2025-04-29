@@ -34,10 +34,10 @@ export class AuthGuard implements CanActivate {
       const decodedToken = this.jwtService.verify(token, {
         secret: configuration().jwt.secretAccessToken
       })
-      console.log(decodedToken);
+      // console.log(decodedToken);
       // get role from user
-      const userRoles = decodedToken['role']
-      console.log(userRoles);
+      const userRoles = decodedToken['roles']
+      // console.log(userRoles);
       const isMatch = matchRoles(userRoles, roles);
       if(!isMatch){
         throw new HttpException('Permission denied', HttpStatus.FORBIDDEN);

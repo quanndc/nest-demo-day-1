@@ -7,7 +7,6 @@ import { JwtService } from '@nestjs/jwt';
 import configuration from 'src/config/configuration';
 import { Request } from 'express';
 import * as JWT from '../../utils/token/extractToken.util';
-import { Cron } from '@nestjs/schedule';
 @Injectable()
 export class UserService {
 
@@ -17,24 +16,6 @@ export class UserService {
     private jwtService: JwtService
   ) {}
 
-  login(){
-    const payload = {name: 'quan', role: ['user'], imgURL: ""}
-
-    const token = configuration().jwt.secretAccessToken
-    console.log(typeof token);
-
-    const accessToken = this.jwtService.sign(payload, {
-      secret: configuration().jwt.secretAccessToken,
-      expiresIn: configuration().jwt.secretAccessTokenExpireIn
-    })
-
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: configuration().jwt.secretRefreshToken,
-      expiresIn: configuration().jwt.secretRefreshTokenExpireIn
-    })
-
-    return {accessToken, refreshToken}
-  }
 
   refreshToken(req: Request){
   
@@ -67,23 +48,26 @@ export class UserService {
 
   // FIND ALL
   async findAll() {
+    const data = await this.usersRepository.find();
+    // console.log(data);
+    return data;
     // return "findAll";
-    const queryRunner = this.PostgresDataSource.createQueryRunner();
-    await queryRunner.connect();
-    // await queryRunner.startTransaction();
+    // const queryRunner = this.PostgresDataSource.createQueryRunner();
+    // await queryRunner.connect();
+    // // await queryRunner.startTransaction();
 
-    try{
-      const data = await queryRunner.query(`CALL change_car_name(${2})`);
-      console.log(data);
-      // await queryRunner.commitTransaction();
-      return data;
-    }catch(e){
-      // await queryRunner.rollbackTransaction();
-      console.log(e);
-      throw new HttpException('Error', HttpStatus.BAD_REQUEST);
-    }finally{
-      await queryRunner.release();
-    }
+    // try{
+    //   const data = await queryRunner.query(`CALL change_car_name(${2})`);
+    //   console.log(data);
+    //   // await queryRunner.commitTransaction();
+    //   return data;
+    // }catch(e){
+    //   // await queryRunner.rollbackTransaction();
+    //   console.log(e);
+    //   throw new HttpException('Error', HttpStatus.BAD_REQUEST);
+    // }finally{
+    //   await queryRunner.release();
+    // }
 
     // const queryRunner = PostgresDataSource.createQueryRunner();
 
@@ -115,8 +99,11 @@ export class UserService {
   // }
 
   // FIND BY ID
-  findOne(id: number){
-    return "findOne";
+  async findOne(id: number){
+    const data = await this.usersRepository.findOne({
+      where: { id }
+    })
+    return data;
   }
 
   // FIND ONE BY EMAIL

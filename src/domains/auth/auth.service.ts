@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -7,20 +7,19 @@ import * as bcrypt from 'bcrypt';
 import configuration from 'src/config/configuration';
 import { JwtService } from '@nestjs/jwt';
 
-
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Auth) private authRepo: Repository<Auth>,
-    private jwtService: JwtService
-  ) { }
-
+    private jwtService: JwtService,
+  ) {
+  }
   async signUp(createAuthDto: CreateAuthDto) {
     //Use Function
     //Use procedure
     // use Repo
     const { email, password } = createAuthDto;
-
+    console.log(email, password);
     const isExist = await this.authRepo.findOne({ where: { email } });
     if (isExist) {
       throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
@@ -37,8 +36,9 @@ export class AuthService {
   }
 
   async signIn(createAuthDto: CreateAuthDto) {
-    const { email, password } = createAuthDto;
 
+    const { email, password } = createAuthDto;
+    // console.log(email, password);
     // tuy chon
     // if(!email || !password){
     //   throw new HttpException('Email or password can be empty', HttpStatus.BAD_REQUEST);
@@ -59,7 +59,7 @@ export class AuthService {
       throw new HttpException('Wrong password', HttpStatus.BAD_REQUEST);
     }
 
-    const user = { ...isExist.user, auth: undefined };
+    const user = { ...isExist.user };
 
     const token = configuration().jwt.secretAccessToken
     console.log(typeof token);
