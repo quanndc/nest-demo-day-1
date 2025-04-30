@@ -55,7 +55,7 @@ export class UserController {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
-
+    
     // Validate file type using file-type
     const fileType: FileTypeResult | undefined = await fromBuffer(file.buffer);
 
