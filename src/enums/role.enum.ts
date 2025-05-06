@@ -1,5 +1,7 @@
 export enum Role {
-    ADMIN = 'admin',
-    USER = 'user'
+    GET_USER_BY_ID = 'get user by id',
+    EDITOR = 'role_editor',
+    VIEWER = 'role_viewer',
+    USER = 'role_user',
 }
 

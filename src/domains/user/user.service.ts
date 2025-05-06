@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
@@ -7,14 +7,50 @@ import { JwtService } from '@nestjs/jwt';
 import configuration from 'src/config/configuration';
 import { Request } from 'express';
 import * as JWT from '../../utils/token/extractToken.util';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 @Injectable()
 export class UserService {
 
   constructor(
     @InjectRepository(User) private usersRepository : Repository<User>,
     @InjectDataSource('default') private PostgresDataSource: DataSource,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
+
+
+  async getUserAndRoles(userId: number) {
+    const data = await this.usersRepository.findOne({
+      where: {
+        id: userId,
+      },
+      relations: {
+        groupPermissions: {
+          permissions: true,
+        },
+      },
+    });
+  
+    if (!data) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+  
+    // Map the data to include user details and flatten permissions
+    const mappedData = {
+      id: data.id,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      permissions: data.groupPermissions.flatMap((group) =>
+        group.permissions.map((permission) => ({
+          id: permission.id,
+          name: permission.name,
+        }))
+      ),
+    };
+  
+    console.log(mappedData);
+    return mappedData;
+  }
 
 
   refreshToken(req: Request){
@@ -135,6 +171,15 @@ export class UserService {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     return this.usersRepository.delete(id);
+  }
+
+
+  async fineOne(id: number){
+    const data = await this.usersRepository.findOne({
+      where: {
+        id: id
+      }
+    })
   }
   
 }

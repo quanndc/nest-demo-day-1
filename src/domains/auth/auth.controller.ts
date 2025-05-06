@@ -9,14 +9,12 @@ export class AuthController {
 
   @Post('signup')
   signUp(@Body() CreateAuthDto: CreateAuthDto){
-    console.log('signup');
     return this.authService.signUp(CreateAuthDto);
   }
 
   @HttpCode(200)
   @Post('login')
   signIn(@Body() CreateAuthDto: CreateAuthDto){
-    console.log('login');
     return this.authService.signIn(CreateAuthDto);
   }
 }

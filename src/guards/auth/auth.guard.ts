@@ -1,21 +1,26 @@
-import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
-import { matchRoles, Roles } from 'src/decorators/roles.decorator';
+import { matchRoles, Permissions } from 'src/decorators/permissions.decorator';
 import * as JWT from '../../utils/token/extractToken.util'
 import configuration from 'src/config/configuration';
+import * as ROLE_UTILS from 'src/utils/role/role.utils'
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
 
-  constructor(private jwtService: JwtService, private reflector: Reflector) {}
+  constructor(private jwtService: JwtService, 
+    private reflector: Reflector,
+  @InjectDataSource('default') private datasource: DataSource) {}
 
 
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext) {
 
     // get roles from request
-    const roles = this.reflector.get<string[]>(Roles, context.getHandler());
+    const roles = this.reflector.get<string[]>(Permissions, context.getHandler());
     if(!roles){
       return true;
     }
@@ -36,8 +41,8 @@ export class AuthGuard implements CanActivate {
       })
       // console.log(decodedToken);
       // get role from user
-      const userRoles = decodedToken['roles']
-      // console.log(userRoles);
+      const userRoles = decodedToken['permissions']
+      console.log(userRoles);
       const isMatch = matchRoles(userRoles, roles);
       if(!isMatch){
         throw new HttpException('Permission denied', HttpStatus.FORBIDDEN);

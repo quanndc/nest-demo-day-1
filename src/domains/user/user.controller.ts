@@ -1,11 +1,8 @@
 import { Controller, Get, Post, Param, ParseIntPipe, UseGuards, UploadedFile, UseInterceptors, BadRequestException, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Roles } from 'src/decorators/roles.decorator';
+import { Permissions } from 'src/decorators/permissions.decorator';
 import { Role } from 'src/enums/role.enum';
 import { AuthGuard } from 'src/guards/auth/auth.guard';
-import { ActionGuard } from 'src/guards/action/action.guard';
-import { Actions } from 'src/decorators/actions.decorator';
-import { Action } from 'src/enums/action.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileTypeResult, fromBuffer } from 'file-type';
 
@@ -24,26 +21,22 @@ export class UserController {
   //   return this.userSevice.refreshToken(req);
   // }
 
+  @Get('roles/:id')
+  findAllRoles(@Param('id', ParseIntPipe) id: number) {
+    return this.userSevice.getUserAndRoles(id);
+  }
+
+
   @Get()
   @UseGuards(AuthGuard)
-  @UseGuards(ActionGuard)
-  @Roles([Role.ADMIN, Role.USER])
-  @Actions({
-    action: Action.Read,
-    subject: 'all',
-  })
+  @Permissions([Role.GET_USER_BY_ID])
   findAll() {
     return this.userSevice.findAll();
   }
 
   @Get(':id')
   @UseGuards(AuthGuard)
-  @UseGuards(ActionGuard)
-  @Roles([Role.USER])
-  @Actions({
-    action: Action.Read,
-    subject: 'all',
-  })
+  @Permissions([Role.GET_USER_BY_ID])
   // @Roles([Role.ADMIN])
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userSevice.findOne(id);
@@ -55,7 +48,7 @@ export class UserController {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
-    
+
     // Validate file type using file-type
     const fileType: FileTypeResult | undefined = await fromBuffer(file.buffer);
 

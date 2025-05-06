@@ -10,5 +10,6 @@ import { CaslAbilityFactory } from 'src/modules/casl/casl-ability/casl-ability.f
   imports: [JwtModule,TypeOrmModule.forFeature([User])],
   controllers: [UserController],
   providers: [UserService, CaslAbilityFactory],
+  exports: [UserService]
 })
 export class UserModule {}

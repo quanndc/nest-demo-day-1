@@ -1,17 +1,20 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Auth } from './entities/auth.entity';
 import * as bcrypt from 'bcrypt';
 import configuration from 'src/config/configuration';
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Auth) private authRepo: Repository<Auth>,
     private jwtService: JwtService,
+    @InjectDataSource('default') private dataSource: DataSource,
+    private userService: UserService
   ) {
   }
   async signUp(createAuthDto: CreateAuthDto) {
@@ -38,6 +41,7 @@ export class AuthService {
   async signIn(createAuthDto: CreateAuthDto) {
 
     const { email, password } = createAuthDto;
+
     // console.log(email, password);
     // tuy chon
     // if(!email || !password){
@@ -59,10 +63,9 @@ export class AuthService {
       throw new HttpException('Wrong password', HttpStatus.BAD_REQUEST);
     }
 
-    const user = { ...isExist.user };
+    const user = {...await this.userService.getUserAndRoles(isExist.user.id)}
+    console.log(user);
 
-    const token = configuration().jwt.secretAccessToken
-    console.log(typeof token);
 
     const accessToken = this.jwtService.sign(user, {
       secret: configuration().jwt.secretAccessToken,
@@ -76,4 +79,40 @@ export class AuthService {
 
     return { accessToken, refreshToken }
   }
+
+  // private async getUserRoles(dbUser: string): Promise<string[]> {
+  //   const result = await this.dataSource.query(`
+  //     SELECT rolname
+  //     FROM pg_roles
+  //     WHERE oid IN (
+  //       SELECT roleid
+  //       FROM pg_auth_members
+  //       WHERE member = (
+  //         SELECT oid FROM pg_roles WHERE rolname = $1
+  //       )
+  //     )
+  //   `, [dbUser]);
+
+  //   return result.map(r => r.rolname);
+  // }
+
+  // async getPrivilegesByTable(dbUser: string, tables: string[]): Promise<Record<string, string[]>> {
+  //   const actions = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'];
+  //   const result: Record<string, string[]> = {};
+
+  //   for (const table of tables) {
+  //     result[table] = [];
+
+  //     for (const action of actions) {
+  //       const res = await this.dataSource.query(
+  //         `SELECT has_table_privilege($1, $2, $3) AS allowed`,
+  //         [dbUser, `public.${table}`, action]
+  //       );
+
+  //       if (res[0].allowed) result[table].push(action);
+  //     }
+  //   }
+
+  //   return result;
+  // }
 }

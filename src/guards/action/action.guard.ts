@@ -13,9 +13,9 @@ export class ActionGuard implements CanActivate {
     private reflector: Reflector
   ) {}
 
-  canActivate(
+  async canActivate(
     context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  ) {
 
     const request = context.switchToHttp().getRequest();
 
@@ -24,11 +24,20 @@ export class ActionGuard implements CanActivate {
     console.log(`Action guarnd is running`);
     delete user.iat
     delete user.exp
-    console.log(user);
+    // console.log(user);
 
-    const abilities = this.caslAbilityFactory.createForUser(user);
     const rules = this.reflector.get<ActionModel[]>(Action, context.getHandler());
-    console.log(rules);
+    // console.log('rule get from decorator');
+    // console.log(rules);
+    const array = rules.map((rule) => {
+      // Ensure the subject is converted to a string
+      return rule.subject
+    });
+
+    const abilities = await this.caslAbilityFactory.createForUser(user, array);
+    // console.log(abilities.rules);
+    
+    // console.log(array);
 
     try {
       if (Array.isArray(rules)) {

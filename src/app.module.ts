@@ -42,7 +42,7 @@ import { CaslModule } from './modules/casl/casl.module';
     ProductModule,
     CategoryModule,
     AuthModule,
-    CaslModule
+    CaslModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,35 +1,49 @@
-import { Ability, AbilityBuilder, AbilityClass, ExtractSubjectType, InferSubjects } from "@casl/ability";
+import { PureAbility, AbilityBuilder, AbilityClass, InferSubjects } from "@casl/ability";
 import { Injectable } from "@nestjs/common";
-import { Category } from "src/domains/category/entities/category.entity";
-import { Product } from "src/domains/product/entities/product.entity";
+import { InjectDataSource } from "@nestjs/typeorm";
 import { User } from "src/domains/user/entities/user.entity";
-import { Action } from "src/enums/action.enum";
-import { Role } from "src/enums/role.enum";
+import { DataSource } from "typeorm";
 
-type Subjects = InferSubjects<typeof Product | typeof User | typeof Category> | 'all';
+import * as ROLE_UTILS from 'src/utils/role/role.utils';
+import { Product } from "src/domains/product/entities/product.entity";
 
-export type AppAbility = Ability<[string, Subjects]>;
+type Subjects = InferSubjects<typeof Product > | 'all';
+
+export type AppAbility = PureAbility<[string, Subjects | string]>;
+
+const sqlToCaslMap: Record<string, 'read' | 'create' | 'update' | 'delete'> = {
+  SELECT: 'read',
+  INSERT: 'create',
+  UPDATE: 'update',
+  DELETE: 'delete',
+};
 
 @Injectable()
 export class CaslAbilityFactory {
-  createForUser(user: User) {
-    const { can, cannot, build } = new AbilityBuilder<
-      Ability<[string, Subjects]>
-    >(Ability as AbilityClass<AppAbility>);
+  constructor(@InjectDataSource('default') private dataSource: DataSource) { }
+  async createForUser(user: User, table: string[]) {
 
-    if (user.roles.includes(Role.ADMIN)) {
-      can(Action.Manage, 'all'); // read-write access to everything
-    } else if (user.roles.includes(Role.USER)) {
-      can(Action.Read, User, { id: user.id });
-      can(Action.Read, Product);
+    const privs = await ROLE_UTILS.getPrivilegesByTableOptimized('admin_user', table, this.dataSource)
+
+    const { can, cannot, build } = new AbilityBuilder<
+      PureAbility<[string, Subjects | string]>
+    >(PureAbility as AbilityClass<AppAbility>);
+
+    for (const table in privs) {
+      const entity = table; //tableToEntityMap[table];
+      const perms = privs[table];
+
+      perms.forEach(sql => {
+        const casl = sqlToCaslMap[sql];
+        if (casl) {
+          can(casl, entity ?? table);
+        }
+      });
     }
 
-    cannot(Action.Delete, Product, { isActive: true });
-    
     return build({
-      // Read https://casl.js.org/v6/en/guide/subject-type-detection#use-classes-as-subject-types for details
-      detectSubjectType: (item) =>
-        item.constructor as ExtractSubjectType<Subjects>,
-    });
+      detectSubjectType: (item: any) => 
+        item ?.constructor || item.type || item,
+    } as any);
   }
 }
