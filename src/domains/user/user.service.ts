@@ -15,6 +15,7 @@ export class UserService {
     @InjectRepository(User) private usersRepository : Repository<User>,
     @InjectDataSource('default') private PostgresDataSource: DataSource,
     private jwtService: JwtService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
 
@@ -47,8 +48,6 @@ export class UserService {
         }))
       ),
     };
-  
-    console.log(mappedData);
     return mappedData;
   }
 
@@ -84,50 +83,16 @@ export class UserService {
 
   // FIND ALL
   async findAll() {
+
+    const cacheData = await this.cacheManager.get('users')
+    if(cacheData){
+      console.log('Cache hit');
+      return cacheData;
+    }
+
     const data = await this.usersRepository.find();
-    // console.log(data);
+    this.cacheManager.set('users', data, 10000000)
     return data;
-    // return "findAll";
-    // const queryRunner = this.PostgresDataSource.createQueryRunner();
-    // await queryRunner.connect();
-    // // await queryRunner.startTransaction();
-
-    // try{
-    //   const data = await queryRunner.query(`CALL change_car_name(${2})`);
-    //   console.log(data);
-    //   // await queryRunner.commitTransaction();
-    //   return data;
-    // }catch(e){
-    //   // await queryRunner.rollbackTransaction();
-    //   console.log(e);
-    //   throw new HttpException('Error', HttpStatus.BAD_REQUEST);
-    // }finally{
-    //   await queryRunner.release();
-    // }
-
-    // const queryRunner = PostgresDataSource.createQueryRunner();
-
-    // await queryRunner.connect();
-
-    // const data = await queryRunner.query(`SELECT * FROM get_car()`);
-
-    // console.log(data);
-
-    // queryRunner.release();
-
-    // return data;
-    // return await this.usersRepository.query('CALL say_hello()');
-    // return this.usersRepository.find({
-    //   relations: {
-    //     profile: true,
-    //     photos: true,
-    //   },
-    //   select: {
-    //     photos: {
-    //       url: true,
-    //     }
-    //   }
-    // });
   }
   // @Cron('* * * * * *')
   // handleCron() {

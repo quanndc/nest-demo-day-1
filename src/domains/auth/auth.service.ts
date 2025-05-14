@@ -7,14 +7,13 @@ import * as bcrypt from 'bcrypt';
 import configuration from 'src/config/configuration';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Auth) private authRepo: Repository<Auth>,
     private jwtService: JwtService,
     @InjectDataSource('default') private dataSource: DataSource,
-    private userService: UserService
+    private userService: UserService,
   ) {
   }
   async signUp(createAuthDto: CreateAuthDto) {
@@ -42,11 +41,16 @@ export class AuthService {
 
     const { email, password } = createAuthDto;
 
+    // await admin.auth().updateUser("obcB3M4Q1fSxZ0AI8me2NMGNJoe2", {
+    //   disabled: true
+    // })
     // console.log(email, password);
     // tuy chon
     // if(!email || !password){
     //   throw new HttpException('Email or password can be empty', HttpStatus.BAD_REQUEST);
     // }
+    // const data = await admin.auth().verifyIdToken('eyJhbGciOiJSUzI1NiIsImtpZCI6IjNmOWEwNTBkYzRhZTgyOGMyODcxYzMyNTYzYzk5ZDUwMjc3ODRiZTUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiTWluaCBRdcOibiBUcuG6p24iLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSjZpYmQxNnluc0E3Z0o0VVFLcnUxSW5hUU44R3poSFEzR0VKd1prT0hoM3AzYzV3PXM5Ni1jIiwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL2Zpci1sb2dpbi13IiwiYXVkIjoiZmlyLWxvZ2luLXciLCJhdXRoX3RpbWUiOjE3NDY2OTU0MjMsInVzZXJfaWQiOiJvYmNCM000UTFmU3haMEFJOG1lMk5NR05Kb2UyIiwic3ViIjoib2JjQjNNNFExZlN4WjBBSThtZTJOTUdOSm9lMiIsImlhdCI6MTc0NjY5NTQyMywiZXhwIjoxNzQ2Njk5MDIzLCJlbWFpbCI6ImdpZGVvbnRtcS5kZXZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMzMDA2MzU0MDkzNTc1MTM1NDAiXSwiZW1haWwiOlsiZ2lkZW9udG1xLmRldkBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJnb29nbGUuY29tIn19.Kxx1K6N9SXEwBtd1amytqBxmNiP5caZ5zDxoF0Ouk9CQmT9j3zPov18lcUVfCjsHcs_lLBiBG8LA3-xPhVavXP11HdfYIpufLBitCFILMxfsfSguj2ub4joo-5hpTJP1Y8woOaENs5VVrED2wuMWfAxQBCJNE1M6BzbqYWMPe6o9KGcH0zQWi2lxxAr5LXgNSl1eKHq_RrNVxkWMxYIEHeAARsw5gbHVQdu6K5aZkwdr-2jOYeu2P55xtaZgyo9J661BmKWPpPpCEd_wssty9UTQvLL7YoBg1LU2kUbspWYJ1nsevaFpUI_jKVXxNnCdJjYgKEN3AcMJtIO5K_G4yQ')
+    // console.log(data);
 
     const isExist = await this.authRepo.findOne(
       {
@@ -64,7 +68,7 @@ export class AuthService {
     }
 
     const user = {...await this.userService.getUserAndRoles(isExist.user.id)}
-    console.log(user);
+    // console.log(user);
 
 
     const accessToken = this.jwtService.sign(user, {

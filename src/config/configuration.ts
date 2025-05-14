@@ -16,5 +16,8 @@ export default () => ({
         autoLoadEntities: true,
         logging: true,
         ssl: false,
+    },
+    elastic_search: {
+        default_node: process.env.ELASTICSEARCH_URL
     }
 })

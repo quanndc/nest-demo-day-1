@@ -41,7 +41,10 @@ export class AuthGuard implements CanActivate {
       })
       // console.log(decodedToken);
       // get role from user
-      const userRoles = decodedToken['permissions']
+      let userRoles = decodedToken['permissions']
+      userRoles = userRoles.map((role: any) => {
+        return role['name']
+      })
       console.log(userRoles);
       const isMatch = matchRoles(userRoles, roles);
       if(!isMatch){
