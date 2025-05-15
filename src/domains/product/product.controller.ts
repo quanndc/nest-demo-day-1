@@ -3,12 +3,13 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SearchProductService } from './search_product.service';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService,
-    private readonly searchProductService: SearchProductService
-  ) {}
+    private readonly searchProductService: SearchProductService,
+  ) { }
 
   @Post()
   create(@Body() createProductDto: CreateProductDto) {
@@ -38,5 +39,15 @@ export class ProductController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productService.remove(+id);
+  }
+
+
+  @MessagePattern('index_product')
+  async handleMessage(@Payload() payload: any) {
+    switch (payload.action) {
+      case 'index_product':
+        console.log(`Received message: ${payload.action}`);
+        this.searchProductService.indexDocument(payload.index, payload.document)
+    }
   }
 }

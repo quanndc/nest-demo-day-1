@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SearchProductService } from './search_product.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class ProductService {
 
-  constructor(private searchProductService: SearchProductService,
-    @InjectRepository(Product) private productRepository: Repository<Product>
+  constructor(
+    @InjectRepository(Product) private productRepository: Repository<Product>,
+    @Inject('APP_SERVICE') private readonly client: ClientProxy,
   ) {}
 
 
@@ -18,23 +20,18 @@ export class ProductService {
   async create(createProductDto: CreateProductDto) {
     const product = this.productRepository.create(createProductDto)
 
-    const index = 'products'
-
-    // const document = {
-    //   id: product.id,
-    //   name: product.name,
-    //   description: product.description,
-    // }
-
-    const indexData = await this.searchProductService.indexDocument(index, createProductDto)
     await this.productRepository.save(product)
 
-    return {
-      product,
-      indexData
-    }
+    this.client.send('index_product', {
+      action: 'index_product',
+      index: 'products',
+      document: product
+    }).subscribe({})
+
+    return product;
   }
 
+  
   findAll() {
     return `This action returns all product`;
   }
@@ -49,5 +46,10 @@ export class ProductService {
 
   remove(id: number) {
     return `This action removes a #${id} product`;
+  }
+
+
+  handleEvent(payload: any) {
+    
   }
 }

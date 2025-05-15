@@ -15,7 +15,8 @@ import { initializeApp } from 'firebase-admin/app';
 import { credential } from 'firebase-admin';
 import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv } from '@keyv/redis';
-import { ElasticsearchModule } from '@nestjs/elasticsearch';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import amqp from 'amqp-connection-manager';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -40,7 +41,24 @@ import { ElasticsearchModule } from '@nestjs/elasticsearch';
     //     node: configuration().elastic_search.default_node,
     //   })
     // }),
+    
 
+    ClientsModule.register(
+      {
+        clients: [{
+          name: 'APP_SERVICE',
+          transport: Transport.RMQ,
+          options: {
+            urls: ['amqp://localhost:5672'],
+            queue: 'myqueue',
+            queueOptions: {
+              durable: false
+            },
+          },
+        },],
+        isGlobal: true,
+      }
+    ),
 
     CacheModule.registerAsync({
       isGlobal: true,
@@ -83,6 +101,9 @@ import { ElasticsearchModule } from '@nestjs/elasticsearch';
     AppService,
     JwtService,
   ],
+  exports: [
+
+  ]
 })
 export class AppModule implements NestModule {
 

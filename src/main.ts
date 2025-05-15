@@ -3,8 +3,8 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 
-import { TimeoutInterceptor } from './interceptors/timeout/timeout.interceptor';
 import { DataSource } from 'typeorm';
+import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +17,19 @@ async function bootstrap() {
   const dataSource = app.get(DataSource);
   console.log('DataSource is initialized:', dataSource.isInitialized);
   app.useGlobalPipes(new ValidationPipe());
+
+  app.connectMicroservice({
+    transport: Transport.RMQ,
+    options: {
+      urls: ['amqp://localhost:5672'],
+      queue: 'myqueue',
+      queueOptions: {
+        durable: false,
+      },
+    }
+  });
+
+  await app.startAllMicroservices();
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
