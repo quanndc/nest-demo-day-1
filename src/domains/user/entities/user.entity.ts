@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Auth } from 'src/domains/auth/entities/auth.entity';
 import { GroupPermission } from 'src/domains/auth/entities/group_permisson.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToMany } from 'typeorm';
@@ -15,6 +16,7 @@ export class User {
     })
     dob: Date;
 
+    @ApiProperty({description: 'User email', example: "example@gmai.com"})
     @Column({
         type: 'text',
         nullable: true,

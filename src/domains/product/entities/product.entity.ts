@@ -1,3 +1,4 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { IsBoolean, IsNotEmpty, IsNumber, IsString, Length, Max, min, Min } from "class-validator";
 import { Category } from "src/domains/category/entities/category.entity";
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, UpdateDateColumn, CreateDateColumn } from "typeorm";

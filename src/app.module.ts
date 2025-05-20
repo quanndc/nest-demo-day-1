@@ -17,6 +17,9 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv } from '@keyv/redis';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import amqp from 'amqp-connection-manager';
+import { SupabaseService } from './services/supabase/supabase.service';
+import { StorageController } from './controllers/storage/storage.controller';
+import { StorageService } from './services/storage/storage.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -41,7 +44,7 @@ import amqp from 'amqp-connection-manager';
     //     node: configuration().elastic_search.default_node,
     //   })
     // }),
-    
+
 
     ClientsModule.register(
       {
@@ -49,7 +52,9 @@ import amqp from 'amqp-connection-manager';
           name: 'APP_SERVICE',
           transport: Transport.RMQ,
           options: {
-            urls: ['amqp://localhost:5672'],
+            // persistent: true,
+            // noAck: false,
+            urls: ['amqp://guest:guest@localhost:5672'],
             queue: 'myqueue',
             queueOptions: {
               durable: false
@@ -96,10 +101,12 @@ import amqp from 'amqp-connection-manager';
     AuthModule,
     CaslModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, StorageController],
   providers: [
     AppService,
     JwtService,
+    SupabaseService,
+    StorageService,
   ],
   exports: [
 
@@ -117,6 +124,7 @@ export class AppModule implements NestModule {
 
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthMiddleware).exclude(
+      {path: '/api', method: RequestMethod.ALL },
       { path: 'auth/login', method: RequestMethod.ALL },
       { path: 'auth/signup', method: RequestMethod.ALL },
       { path: 'auth/refresh-token', method: RequestMethod.ALL },

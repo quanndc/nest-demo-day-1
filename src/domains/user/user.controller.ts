@@ -5,8 +5,10 @@ import { Role } from 'src/enums/role.enum';
 import { AuthGuard } from 'src/guards/auth/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileTypeResult, fromBuffer } from 'file-type';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 
+@ApiTags('user')
 @Controller('user')
 export class UserController {
 
@@ -40,29 +42,5 @@ export class UserController {
   // @Roles([Role.ADMIN])
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userSevice.findOne(id);
-  }
-
-  @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    if (!file) {
-      throw new BadRequestException('No file uploaded');
-    }
-
-    // Validate file type using file-type
-    const fileType: FileTypeResult | undefined = await fromBuffer(file.buffer);
-
-    if (!fileType) {
-      throw new BadRequestException('Unable to determine file type');
-    }
-
-    // Example: Allow only PNG and JPEG files
-    const allowedMimeTypes = ['image/png', 'image/jpeg'];
-    if (!allowedMimeTypes.includes(fileType.mime)) {
-      throw new BadRequestException(`Invalid file type: ${fileType.mime}`);
-    }
-
-    console.log('File is valid:', fileType);
-    return { message: 'File uploaded successfully', fileType };
   }
 }

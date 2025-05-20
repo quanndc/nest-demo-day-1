@@ -27,6 +27,7 @@ export class ProductService {
       index: 'products',
       document: product
     }).subscribe({})
+    
 
     return product;
   }
