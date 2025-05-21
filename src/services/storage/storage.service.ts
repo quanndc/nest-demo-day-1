@@ -6,21 +6,6 @@ export class StorageService {
     constructor(private supabaseService: SupabaseService) {
     }
 
-    async uploadFile(file: Express.Multer.File, bucket: string) {
-        const { data, error } = await this.supabaseService.supabaseClient
-            .storage
-            .from(bucket)
-            .upload(file.originalname, file.buffer, {upsert: true, contentType: file.mimetype, cacheControl: '3600' }); // upsert = true => khong can xoa file cu
-            // upsert kh kich hoat trigger update
-
-        if (error) {
-            throw new Error(`Error uploading file: ${error.message}`);
-        }
-        const filePath = data.path;
-        const fileUrl = this.getFileUrl(filePath, bucket);
-        return fileUrl;
-    }
-
     private getFileUrl(filePath: string, bucket: string) {
         const { data } = this.supabaseService.supabaseClient
             .storage
@@ -66,7 +51,6 @@ export class StorageService {
             const fileUrl = this.getFileUrl(filePath, bucket);
             fileUrls.push(fileUrl);
         }
-
         return fileUrls;
     }
 }
