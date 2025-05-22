@@ -21,7 +21,7 @@ async function bootstrap() {
     transport: Transport.RMQ,
     options: {
       // persistent: true,
-      // noAck: false,
+      noAck: false,
       urls: ['amqp://guest:guest@localhost:5672'],
       queue: 'myqueue',
       queueOptions: {

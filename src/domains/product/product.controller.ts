@@ -3,7 +3,7 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SearchProductService } from './search_product.service';
-import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
+import { Ctx, EventPattern, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import Sql from '@elastic/elasticsearch/lib/api/api/sql';
 import { ApiBearerAuth, ApiBody, ApiExcludeController, ApiExcludeEndpoint, ApiForbiddenResponse, ApiOperation, ApiParam, ApiResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { CreateUserDto } from '../user/dto/create-user.dto';
@@ -114,19 +114,18 @@ export class ProductController {
     try {
       switch (payload.action) {
         case 'index_product':
+          console.log(payload);
           // this.logger.log(`Processing index_product: ${JSON.stringify(payload)}`);
           const result = await this.searchProductService.indexDocument(payload.index, payload.document);
           channel.ack(originalMsg); // Acknowledge on success
+      // channel.nack(originalMsg, false, true);
+
           return result;
-        default:
-          // this.logger.warn(`Unknown action: ${payload.action}`);
-          channel.ack(originalMsg); // Acknowledge to avoid hanging, but log warning
-          return null;
       }
     } catch (error) {
       // this.logger.error(`Error processing message: ${error.message}`);
-      channel.nack(originalMsg, false, false); // Reject without requeue on error
-      console.log(error); // Re-throw to let NestJS handle error logging/response
+      channel.nack(originalMsg, false, true);
+      console.log("Lỗi"); // Re-throw to let NestJS handle error logging/response
     }
   }
 }
