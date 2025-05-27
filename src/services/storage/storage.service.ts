@@ -24,7 +24,7 @@ export class StorageService {
                 const { data, error } = await this.supabaseService.supabaseClient
                     .storage
                     .from(bucket)
-                    .upload(file.originalname, file.buffer, {cacheControl: '3600',upsert: true, contentType: file.mimetype});
+                    .upload(file.originalname, file.buffer, {cacheControl: '1800',upsert: true, contentType: file.mimetype});
 
                 if (error) {
                     throw new Error(`Error uploading multi file: ${error.message}`);
@@ -43,7 +43,7 @@ export class StorageService {
             const { data, error } = await this.supabaseService.supabaseClient
                 .storage
                 .from(bucket)
-                .upload(file.originalname, file.buffer, {cacheControl: '3600',upsert: true, contentType: file.mimetype});
+                .upload(file.originalname, file.buffer, {cacheControl: '1800',upsert: true, contentType: file.mimetype});
 
             if (error) {
                 throw new Error(`Error uploading file: ${error.message}`);
