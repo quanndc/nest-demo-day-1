@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Post, Res, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { FileTypePipe } from 'src/pipes/file-type/file-type.pipe';
 import { StorageService } from 'src/services/storage/storage.service';

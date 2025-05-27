@@ -20,7 +20,6 @@ async function bootstrap() {
   app.connectMicroservice({
     transport: Transport.RMQ,
     options: {
-      // persistent: true,
       noAck: false,
       urls: ['amqp://guest:guest@localhost:5672'],
       queue: 'myqueue',
@@ -29,6 +28,7 @@ async function bootstrap() {
       },
     }
   });
+  
 
     const config = new DocumentBuilder()
     .setTitle('UI For Testing My API')

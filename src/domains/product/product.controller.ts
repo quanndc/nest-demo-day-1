@@ -114,18 +114,14 @@ export class ProductController {
     try {
       switch (payload.action) {
         case 'index_product':
-          console.log(payload);
           // this.logger.log(`Processing index_product: ${JSON.stringify(payload)}`);
           const result = await this.searchProductService.indexDocument(payload.index, payload.document);
           channel.ack(originalMsg); // Acknowledge on success
       // channel.nack(originalMsg, false, true);
-
           return result;
       }
     } catch (error) {
-      // this.logger.error(`Error processing message: ${error.message}`);
       channel.nack(originalMsg, false, true);
-      console.log("Lỗi"); // Re-throw to let NestJS handle error logging/response
     }
   }
 }

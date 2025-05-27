@@ -44,6 +44,9 @@ export class AuthMiddleware implements NestMiddleware {
         next();
       }
     }catch(e){
+      // 2 lý do có thể xảy ra
+      // 1. Token đã hết hạn
+      // 2. Token không hợp lệ
       throw new HttpException(e.message, HttpStatus.UNAUTHORIZED);
     }
   }

@@ -6,6 +6,8 @@ export class StorageService {
     constructor(private supabaseService: SupabaseService) {
     }
 
+    
+
     private getFileUrl(filePath: string, bucket: string) {
         const { data } = this.supabaseService.supabaseClient
             .storage
@@ -25,13 +27,12 @@ export class StorageService {
                     .upload(file.originalname, file.buffer, {cacheControl: '3600',upsert: true, contentType: file.mimetype});
 
                 if (error) {
-                    throw new Error(`Error uploading file: ${error.message}`);
+                    throw new Error(`Error uploading multi file: ${error.message}`);
                 }
                 const filePath = data.path;
                 return this.getFileUrl(filePath, bucket);
             }),
         );
-
         return fileUrls;
     }
 
