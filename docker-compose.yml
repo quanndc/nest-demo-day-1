@@ -36,6 +36,63 @@ services:
       timeout: 10s
       retries: 5
 
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=my_db
+    ports:
+      - "5432:5432"
+    networks:
+      - somenetwork
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:6
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - somenetwork
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - somenetwork
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # myapp:
+  #     image: backend:latest
+  #     container_name: myapp
+  #     ports:
+  #         - "3000:3000"
+  #     networks:
+  #         - somenetwork
+  #     depends_on:
+  #         - postgres
+  #         - redis
+  #         - rabbitmq
+  #         - elasticsearch
+
 networks:
   somenetwork:
     name: somenetwork

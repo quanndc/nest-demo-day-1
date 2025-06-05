@@ -3,5 +3,8 @@ import { HttpException, HttpStatus, Inject, Injectable, Scope } from '@nestjs/co
 @Injectable()
 export class AppService {
   
+    hello() {
+        return "Hello";
+    }
     
 }

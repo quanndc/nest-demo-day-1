@@ -7,6 +7,8 @@ export class FileTypePipe implements PipeTransform {
 
   async transform(files: Express.Multer.File[], metadata: ArgumentMetadata) {
 
+    console.log(files[0].mimetype);
+
     if (!files) {
       throw new BadRequestException('No file uploaded');
     }

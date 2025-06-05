@@ -22,6 +22,7 @@
   "dependencies": {
     "@casl/ability": "^6.7.3",
     "@elastic/elasticsearch": "^9.0.1",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@keyv/redis": "^4.4.0",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.0.1",
@@ -46,11 +47,13 @@
     "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.5.0",
+    "ffmpeg": "^0.0.4",
     "file-type": "^16.5.4",
     "firebase-admin": "^13.3.0",
     "pg": "^8.14.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "slugify": "^1.6.6",
     "typeorm": "^0.3.22"
   },
   "devDependencies": {

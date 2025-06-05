@@ -70,7 +70,7 @@ import { StorageService } from './services/storage/storage.service';
         return {
           ttl: 5000,
           stores: [
-            createKeyv('redis://localhost:6379'),
+            createKeyv('redis://redis:6379'),
           ]
         }
       }
@@ -115,7 +115,7 @@ export class AppModule implements NestModule {
 
   constructor() {
     const app = initializeApp({
-      credential: credential.cert('src/keys/firebase-admin-key.json'),
+      credential: credential.cert('firebase-admin-key.json'),
     });
   }
 
